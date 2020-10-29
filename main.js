@@ -1,9 +1,11 @@
 let flowers = [];
 let backgroundColor;
 let colorOptions = [];
+let mic;
 
 function setup() {
     getAudioContext().suspend();
+    mic = new p5.AudioIn();
 
     colorMode(HSB, 100);
     createCanvas(window.innerWidth, window.innerHeight);
@@ -18,7 +20,7 @@ function setup() {
     backgroundColor = color(tinycolor(rootColor.toString()).lighten().toHexString());
     
 
-    const totalFlowers = 400;
+    const totalFlowers = 200;
     const variance = 25;
     const padding = 30;
 
@@ -27,9 +29,8 @@ function setup() {
             let centerX = i/sqrt(totalFlowers)*(window.innerWidth + padding);
             let centerY = j/sqrt(totalFlowers)*(window.innerHeight + padding);
             let randomCol = color(colorOptions[int(random(0,colorOptions.length))].toHexString());
-            let flower = new Flower(random(centerX - variance, centerX + variance), random(centerY - variance, centerY + variance), randomCol, random(100, 200), int(random(0, 2)));
+            let flower = new Flower(random(centerX - variance, centerX + variance), random(centerY - variance, centerY + variance), randomCol, random(150, 300), int(random(0, 2)));
             flowers.push(flower);
-            flower.draw();
             }
         }
   }
@@ -37,19 +38,28 @@ function setup() {
 function mousePressed() {
     if (getAudioContext().state !== 'running') {
         getAudioContext().resume();
+        mic.start();
     }
 }
   
 function draw() {
-    background(backgroundColor);
-    flowers.forEach(f => {
-        if (f.isHovered()) {
-            f.rotation = (f.rotation + (2 * f.direction))%360;
-        } else {
-            f.rotation = (f.rotation + (0.25 * f.direction))%360;
-        }
-        f.draw();
-    })
+    if (getAudioContext().state === 'running') {
+        background(backgroundColor);
+        flowers.forEach(f => {
+            if (f.isHovered()) {
+                f.rotation = (f.rotation + (2 * f.direction))%360;
+            } else {
+                f.rotation = (f.rotation + (0.25 * f.direction))%360;
+            }
+            f.draw();
+        })
+    } else {
+        fill(0);
+        textAlign(CENTER);
+        textSize(32);
+        text('click to start', width/2, height/2);
+    }
+    
 }
 
 function randomSign() {
