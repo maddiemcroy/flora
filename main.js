@@ -2,6 +2,7 @@ let flowers = [];
 let backgroundColor;
 let colorOptions = [];
 let mic;
+let volume = 0;
 
 function setup() {
     getAudioContext().suspend();
@@ -44,13 +45,27 @@ function mousePressed() {
   
 function draw() {
     if (getAudioContext().state === 'running') {
+        if (mic.getLevel() > 0.05) {
+            if (volume < mic.getLevel() * 50) {
+                volume = mic.getLevel() * 50;
+            }
+        } else {
+            if (volume > 0.5) {
+                volume -= 0.5;
+            }
+        }
+
+        let hueShift = volume/4;
+        backgroundColor = color(tinycolor(backgroundColor.toString()).spin(hueShift).toHexString());
         background(backgroundColor);
         flowers.forEach(f => {
             if (f.isHovered()) {
                 f.rotation = (f.rotation + (2 * f.direction))%360;
             } else {
-                f.rotation = (f.rotation + (0.25 * f.direction))%360;
+                f.rotation = (f.rotation + ((0.25 + volume) * f.direction))%360;
             }
+            f.col = color(tinycolor(f.col.toString()).spin(hueShift).toHexString());
+            f.innerCol = color(tinycolor(f.innerCol.toString()).spin(hueShift).toHexString());
             f.draw();
         })
     } else {
