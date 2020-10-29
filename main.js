@@ -3,6 +3,8 @@ let backgroundColor;
 let colorOptions = [];
 
 function setup() {
+    getAudioContext().suspend();
+
     colorMode(HSB, 100);
     createCanvas(window.innerWidth, window.innerHeight);
     noStroke();
@@ -31,6 +33,12 @@ function setup() {
             }
         }
   }
+
+function mousePressed() {
+    if (getAudioContext().state !== 'running') {
+        getAudioContext().resume();
+    }
+}
   
 function draw() {
     background(backgroundColor);
