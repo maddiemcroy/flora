@@ -55,17 +55,19 @@ function draw() {
             }
         }
 
-        let hueShift = volume/4;
-        backgroundColor = color(tinycolor(backgroundColor.toString()).spin(hueShift).toHexString());
         background(backgroundColor);
         flowers.forEach(f => {
             if (f.isHovered()) {
                 f.rotation = (f.rotation + (2 * f.direction))%360;
+                f.col = spinHue(f.col, 5);
+                f.innerCol = spinHue(f.innerCol, 5);
             } else {
                 f.rotation = (f.rotation + ((0.25 + volume) * f.direction))%360;
+                if (f.col.toString() !== f.initialCol.toString()) {
+                    f.col = spinHue(f.col, 1);
+                    f.innerCol = spinHue(f.innerCol, 1);
+                }
             }
-            f.col = color(tinycolor(f.col.toString()).spin(hueShift).toHexString());
-            f.innerCol = color(tinycolor(f.innerCol.toString()).spin(hueShift).toHexString());
             f.draw();
         })
     } else {
@@ -77,6 +79,10 @@ function draw() {
     
 }
 
+function spinHue(col, degrees) {
+    return color(tinycolor(col.toString()).spin(degrees).toHexString());
+}
+
 function randomSign() {
     return 1 - (round(random(0, 1)) * 2);
 }
@@ -86,6 +92,7 @@ class Flower {
         this.x = x;
         this.y = y;
         this.col = col;
+        this.initialCol = col.toString();
         this.size = size;
         this.type = type;
         this.rotation = 0;
