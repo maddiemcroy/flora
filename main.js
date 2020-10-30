@@ -8,17 +8,18 @@ function setup() {
     getAudioContext().suspend();
     mic = new p5.AudioIn();
 
-    colorMode(HSB, 100);
+    colorMode(HSB, 360, 100, 100);
     createCanvas(window.innerWidth, window.innerHeight);
     noStroke();
 
-    const rootColor = color(random(0, 100), random(25, 80), random(75, 85));
-    colorOptions.push(tinycolor(rootColor.toString()));
+    const rootColor = color(random(0, 360), random(25, 80), random(75, 85));
+    colorOptions.push(rootColor);
     for (let i = 0; i < 5; i++) {
-        colorOptions.push(tinycolor(colorOptions[i].toString()).spin(25));
+        console.log(colorOptions);
+        colorOptions.push(spinHue(colorOptions[i], 25));
     }
 
-    backgroundColor = color(tinycolor(rootColor.toString()).lighten().toHexString());
+    backgroundColor = color(hue(rootColor), saturation(rootColor), brightness(90));
     
 
     const totalFlowers = 200;
@@ -29,8 +30,8 @@ function setup() {
         for (let j = 0; j < sqrt(totalFlowers); j++) {
             let centerX = i/sqrt(totalFlowers)*(window.innerWidth + padding);
             let centerY = j/sqrt(totalFlowers)*(window.innerHeight + padding);
-            let randomCol = color(colorOptions[int(random(0,colorOptions.length))].toHexString());
-            let flower = new Flower(random(centerX - variance, centerX + variance), random(centerY - variance, centerY + variance), randomCol, random(150, 300), int(random(0, 2)));
+            let randomCol = colorOptions[int(random(0,colorOptions.length))];
+            let flower = new Flower(random(centerX - variance, centerX + variance), random(centerY - variance, centerY + variance), randomCol, int(random(150, 300)), int(random(0, 2)));
             flowers.push(flower);
             }
         }
@@ -59,13 +60,19 @@ function draw() {
         flowers.forEach(f => {
             if (f.isHovered()) {
                 f.rotation = (f.rotation + (2 * f.direction))%360;
-                f.col = spinHue(f.col, 5);
-                f.innerCol = spinHue(f.innerCol, 5);
+                f.col = spinHue(f.col, 3);
+                f.innerCol = spinHue(f.innerCol, 3);
+                if (f.size < f.initialSize*2) {
+                    f.size = f.size + 5;
+                }
             } else {
                 f.rotation = (f.rotation + ((0.25 + volume) * f.direction))%360;
                 if (f.col.toString() !== f.initialCol.toString()) {
-                    f.col = spinHue(f.col, 1);
-                    f.innerCol = spinHue(f.innerCol, 1);
+                    f.col = spinHue(f.col, 3);
+                    f.innerCol = spinHue(f.innerCol, 3);
+                }
+                if (f.size !== f.initialSize) {
+                    f.size = f.size - 1;
                 }
             }
             f.draw();
@@ -79,8 +86,8 @@ function draw() {
     
 }
 
-function spinHue(col, degrees) {
-    return color(tinycolor(col.toString()).spin(degrees).toHexString());
+function spinHue(col, change) {
+    return color((hue(col) + change)%360, saturation(col), brightness(col));
 }
 
 function randomSign() {
@@ -94,18 +101,19 @@ class Flower {
         this.col = col;
         this.initialCol = col.toString();
         this.size = size;
+        this.initialSize = size;
         this.type = type;
         this.rotation = 0;
         this.direction = randomSign();
         
         this.bounds = {
-            top: y + (this.size/2.0),
-            bottom: y - (this.size/2.0),
-            left: x - (this.size/2.0),
-            right: x + (this.size/2.0)
+            top: y + (this.size/3.0),
+            bottom: y - (this.size/3.0),
+            left: x - (this.size/3.0),
+            right: x + (this.size/3.0)
         }
 
-        this.innerCol = colorOptions[int(random(0, colorOptions.length))].toHexString();
+        this.innerCol = colorOptions[int(random(0, colorOptions.length))];
     }
 
     draw() {
